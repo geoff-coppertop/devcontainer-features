@@ -1,0 +1,10 @@
+{
+    "connect-iq-sdk-pinned": {
+        "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+        "features": {
+            "connect-iq-sdk": {
+                "version": "7.4.0"
+            }
+        }
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "shell-baseline-default": {
+        "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+        "features": {
+            "shell-baseline": {}
+        }
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "id": "shell-baseline",
+    "version": "1.0.0",
+    "name": "Shell baseline",
+    "description": "Common interactive-shell tooling (fish, starship, zoxide, fzf, eza, bat, lazygit, gitui, delta, fastfetch) plus the shared fish/git dotfiles from geoff-coppertop/dotfiles, installed as plain files.",
+    "options": {
+        "dotfilesRef": {
+            "type": "string",
+            "default": "75100ca540a531938db147aa5abcc1059189272e",
+            "description": "Commit SHA or ref of geoff-coppertop/dotfiles to install."
+        }
+    }
+}

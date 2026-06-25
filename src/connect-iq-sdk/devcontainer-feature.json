@@ -1,0 +1,13 @@
+{
+    "id": "connect-iq-sdk",
+    "version": "1.0.0",
+    "name": "Garmin Connect IQ SDK",
+    "description": "Installs a JDK and the connect-iq-sdk-manager CLI (non-interactive replacement for Garmin's broken SDK Manager GUI), then downloads, license-accepts, and pins a specific Connect IQ SDK version at image build time.",
+    "options": {
+        "version": {
+            "type": "string",
+            "default": "",
+            "description": "Connect IQ SDK version to download and pin (e.g. 7.4.0). Must be set explicitly; the install fails if left empty (a container only ever targets one version)."
+        }
+    }
+}
