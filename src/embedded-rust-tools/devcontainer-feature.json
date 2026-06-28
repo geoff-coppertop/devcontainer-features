@@ -1,0 +1,16 @@
+{
+    "id": "embedded-rust-tools",
+    "version": "1.0.0",
+    "name": "Embedded Rust tools",
+    "description": "Cargo crates commonly needed for embedded Rust development: cargo-binstall, cargo-generate, flip-link, and probe-rs-tools. Depends on the official rust feature; install that first.",
+    "options": {
+        "githubToken": {
+            "type": "string",
+            "default": "",
+            "description": "Optional GitHub token. cargo-binstall queries api.github.com to find release artefacts; anonymous calls are limited to 60/hr per IP. Pass via \"${localEnv:GITHUB_TOKEN}\" in devcontainer.json to dodge the limit on shared/CI builds."
+        }
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/rust"
+    ]
+}

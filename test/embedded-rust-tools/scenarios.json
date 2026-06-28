@@ -1,0 +1,12 @@
+{
+    "embedded-rust-tools-default": {
+        "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+        "features": {
+            "ghcr.io/devcontainers/features/rust:1": {
+                "version": "stable",
+                "profile": "minimal"
+            },
+            "embedded-rust-tools": {}
+        }
+    }
+}
