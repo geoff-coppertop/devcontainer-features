@@ -1,0 +1,16 @@
+{
+    "claude-code-default": {
+        "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+        "features": {
+            "claude-code": {}
+        }
+    },
+    "claude-code-latest-channel": {
+        "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+        "features": {
+            "claude-code": {
+                "channel": "latest"
+            }
+        }
+    }
+}
