@@ -1,6 +1,6 @@
 {
     "id": "shell-baseline",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Shell baseline",
     "description": "Common interactive-shell tooling (fish, starship, zoxide, fzf, eza, bat, lazygit, gitui, delta, fastfetch) plus the shared fish/git dotfiles from geoff-coppertop/dotfiles, installed as plain files.",
     "options": {
@@ -8,6 +8,26 @@
             "type": "string",
             "default": "75100ca540a531938db147aa5abcc1059189272e",
             "description": "Commit SHA or ref of geoff-coppertop/dotfiles to install."
+        },
+        "lazygitVersion": {
+            "type": "string",
+            "default": "0.62.2",
+            "description": "lazygit release to install (no leading v). Use \"latest\" to resolve from the GitHub API."
+        },
+        "gituiVersion": {
+            "type": "string",
+            "default": "0.28.1",
+            "description": "gitui release to install (no leading v). Use \"latest\" to resolve from the GitHub API."
+        },
+        "deltaVersion": {
+            "type": "string",
+            "default": "0.19.2",
+            "description": "git-delta release to install. Use \"latest\" to resolve from the GitHub API."
+        },
+        "fastfetchVersion": {
+            "type": "string",
+            "default": "2.65.1",
+            "description": "fastfetch release to install. Use \"latest\" to resolve from the GitHub API."
         }
     }
 }

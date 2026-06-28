@@ -1,6 +1,30 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
+# --- Versions ----------------------------------------------------------------
+# Pinned defaults. Override per build by setting the matching option in
+# devcontainer.json (e.g. "lazygitVersion": "0.62.2"). Pass "latest" to resolve
+# the newest tag via the GitHub API; this is rate-limited (60/hr anonymous) and
+# not recommended for unattended CI builds.
+LAZYGIT_VERSION="${LAZYGITVERSION:-0.62.2}"
+GITUI_VERSION="${GITUIVERSION:-0.28.1}"
+DELTA_VERSION="${DELTAVERSION:-0.19.2}"
+FASTFETCH_VERSION="${FASTFETCHVERSION:-2.65.1}"
+
+# Resolve "latest" -> concrete tag. curl -f makes API errors (rate limit, etc.)
+# fail loudly instead of silently producing an invalid version string.
+resolve_latest() {
+    local repo="$1" strip_v="${2:-0}" tag
+    tag=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest" | jq -er '.tag_name')
+    if [ "$strip_v" = "1" ]; then printf '%s\n' "${tag#v}"; else printf '%s\n' "$tag"; fi
+}
+
+[ "$LAZYGIT_VERSION"   = "latest" ] && LAZYGIT_VERSION=$(resolve_latest jesseduffield/lazygit 1)
+[ "$GITUI_VERSION"     = "latest" ] && GITUI_VERSION=$(resolve_latest extrawurst/gitui 1)
+[ "$DELTA_VERSION"     = "latest" ] && DELTA_VERSION=$(resolve_latest dandavison/delta 0)
+[ "$FASTFETCH_VERSION" = "latest" ] && FASTFETCH_VERSION=$(resolve_latest fastfetch-cli/fastfetch 0)
+
+# --- apt baseline ------------------------------------------------------------
 apt-get update
 apt-get install -y --no-install-recommends \
     bat \
@@ -26,7 +50,7 @@ rm -rf /var/lib/apt/lists/*
 ln -sf /usr/bin/batcat /usr/local/bin/bat
 ln -sf /usr/bin/fdfind /usr/local/bin/fd
 
-## eza: official apt repo (no cargo/rust toolchain required)
+# --- eza (third-party apt repo) ----------------------------------------------
 mkdir -p /etc/apt/keyrings
 curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
 echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" > /etc/apt/sources.list.d/gierens.list
@@ -36,42 +60,41 @@ apt-get install -y eza
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
-## starship, zoxide: official install scripts (static binaries)
-curl -sS https://starship.rs/install.sh | sh -s -- -y
-curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+# --- starship, zoxide (upstream install scripts) -----------------------------
+# zoxide's installer defaults to $HOME/.local/bin; the feature install runs as
+# root with HOME pointing at the container user's home, which lands the binary
+# in a directory the user's PATH doesn't include. Pin both to system paths.
+curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh -s -- --bin-dir=/usr/local/bin --man-dir=/usr/local/share/man
 
-## lazygit (Go binary release)
-LAZYGIT_VERSION=$(curl -sf https://api.github.com/repos/jesseduffield/lazygit/releases/latest | jq -r '.tag_name' | sed 's/^v//')
-curl -sLo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+# --- lazygit -----------------------------------------------------------------
+curl -fsSLo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 tar -xzf /tmp/lazygit.tar.gz -C /usr/local/bin lazygit
 rm /tmp/lazygit.tar.gz
 
-## gitui (prebuilt release binary)
-GITUI_VERSION=$(curl -sf https://api.github.com/repos/extrawurst/gitui/releases/latest | jq -r '.tag_name')
-curl -sLo /tmp/gitui.tar.gz "https://github.com/extrawurst/gitui/releases/download/${GITUI_VERSION}/gitui-linux-x86_64.tar.gz"
-tar -xzf /tmp/gitui.tar.gz -C /usr/local/bin gitui
+# --- gitui -------------------------------------------------------------------
+# Archive contains only ./gitui; extract whole archive into /usr/local/bin.
+curl -fsSLo /tmp/gitui.tar.gz "https://github.com/extrawurst/gitui/releases/download/v${GITUI_VERSION}/gitui-linux-x86_64.tar.gz"
+tar -xzf /tmp/gitui.tar.gz -C /usr/local/bin
 rm /tmp/gitui.tar.gz
 
-## git-delta
-DELTA_VERSION=$(curl -sf https://api.github.com/repos/dandavison/delta/releases/latest | jq -r '.tag_name')
-curl -sLo /tmp/delta.deb "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/git-delta_${DELTA_VERSION}_amd64.deb"
+# --- git-delta ---------------------------------------------------------------
+curl -fsSLo /tmp/delta.deb "https://github.com/dandavison/delta/releases/download/${DELTA_VERSION}/git-delta_${DELTA_VERSION}_amd64.deb"
 dpkg -i /tmp/delta.deb
 rm /tmp/delta.deb
 
-## fastfetch (not in Debian bookworm standard repos)
-FASTFETCH_VERSION=$(curl -sf https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest | jq -r '.tag_name')
-curl -sLo /tmp/fastfetch.deb "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VERSION}/fastfetch-linux-amd64.deb"
+# --- fastfetch ---------------------------------------------------------------
+curl -fsSLo /tmp/fastfetch.deb "https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VERSION}/fastfetch-linux-amd64.deb"
 dpkg -i /tmp/fastfetch.deb
 rm /tmp/fastfetch.deb
 
+# --- shell + dotfiles --------------------------------------------------------
 _CONTAINER_USER="${_REMOTE_USER:-${USERNAME:-vscode}}"
 
-## Set fish as the container user's default shell
 if id "$_CONTAINER_USER" >/dev/null 2>&1; then
     usermod -s /usr/bin/fish "$_CONTAINER_USER"
 fi
 
-## Apply shared dotfiles (fish config, git aliases/commit template) from geoff-coppertop/dotfiles
 DOTFILES_REF="${DOTFILESREF:-75100ca540a531938db147aa5abcc1059189272e}"
 DOTFILES_DIR=$(mktemp -d)
 git clone --quiet https://github.com/geoff-coppertop/dotfiles.git "$DOTFILES_DIR"
