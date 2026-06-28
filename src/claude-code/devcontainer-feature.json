@@ -1,0 +1,24 @@
+{
+    "id": "claude-code",
+    "version": "1.0.0",
+    "name": "Claude Code",
+    "description": "Installs Anthropic's Claude Code CLI from the official apt repository (Debian/Ubuntu). VS Code users also get the Claude Code extension via customizations; other editors ignore that block and just get the CLI.",
+    "options": {
+        "channel": {
+            "type": "string",
+            "enum": ["stable", "latest"],
+            "default": "stable",
+            "description": "Release channel. 'stable' lags ~1 week and skips releases with major regressions; 'latest' tracks each release as soon as it ships."
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "anthropic.claude-code"
+            ]
+        }
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}
