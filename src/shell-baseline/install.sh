@@ -95,7 +95,7 @@ if id "$_CONTAINER_USER" >/dev/null 2>&1; then
     usermod -s /usr/bin/fish "$_CONTAINER_USER"
 fi
 
-DOTFILES_REF="${DOTFILESREF:-75100ca540a531938db147aa5abcc1059189272e}"
+DOTFILES_REF="${DOTFILESREF:-2af9c5bd414e59ee581813e43b644481091a01a2}"
 DOTFILES_DIR=$(mktemp -d)
 git clone --quiet https://github.com/geoff-coppertop/dotfiles.git "$DOTFILES_DIR"
 git -C "$DOTFILES_DIR" checkout --quiet "$DOTFILES_REF"
