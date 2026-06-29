@@ -14,10 +14,10 @@ jobs:
       contents: write
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -28,7 +28,9 @@ jobs:
           publish-features: "true"
           base-path-to-features: "./src"
           generate-docs: "true"
-          # Needed for the post-publish repo git-tagging step (uses the
-          # GitHub API); without it the action crashes after a successful
-          # publish whenever a new version is released.
-          token: "${{ secrets.GITHUB_TOKEN }}"
+        # devcontainers/action's post-publish repo git-tagging step calls
+        # github.getOctokit(process.env.GITHUB_TOKEN || '') directly, so the
+        # token must be exposed as a step env var. Passing it via `with: token:`
+        # is silently dropped -- the action declares no such input.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
